@@ -61,3 +61,24 @@ function nodes_get($nodes_ids)
   }
 }
 
+function way_nodes_get($way_id)
+{
+
+}
+
+function way_nodes_locations_get($way_id)
+{
+  if ($_config['store_type'] == 'mysql')
+  {
+    // Тут блин оптимизация для mysql c join =)
+    $result = array();
+    $sql = 'SELECT * FROM  ways_nodes LEFT JOIN nodes ON ways_nodes.node_id = nodes.node_id WHERE  ways_nodes.way_id='.$way_id;
+    $qh = mysql_query($sql);
+    while ($row = mysql_fetch_array($qh, MYSQL_ASSOC)) 
+    {
+        $result[] = $row;
+    }
+    return $result;
+   
+  }
+}
