@@ -61,38 +61,25 @@ function get_point_radius($gps, $true_angle)
 
 
 function check_lat($lat) 
-{ 
-    if($lat>=0 && $lat<=90) 
-    { 
-        return 'north'; 
-    } 
-    else 
-    if($lat>=-90 && $lat<=0) 
-    { 
-        return 'south'; 
-    } 
-
+{
+    if($lat>=0 && $lat<=90)       return 'north'; 
+    else
+	if($lat>=-90 && $lat<=0)  return 'south'; 
     return false; 
 } 
 
 function check_lon($lon) 
 { 
-    if($lon>=0 && $lon<=180) 
-    { 
-        return 'east'; 
-    } 
-    else 
-    if($lon>=-180 && $lon<=0) 
-    { 
-        return 'west'; 
-    } 
-
+    if($lon>=0 && $lon<=180)  return 'east'; 
+    else
+       if($lon>=-180 && $lon<=0)  return 'west'; 
     return false; 
-
 } 
 
 function location_tree_src_get($lat,$lon)
 {
+  global $_config;
+  $sql = 'SELECT * FROM ways WHERE  type="area" AND (('.$lat.' BETWEEN maxlat AND minlat) AND ('.$lon.' BETWEEN maxlon AND minlon)) ';
 
 }
 
