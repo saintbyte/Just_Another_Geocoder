@@ -76,11 +76,49 @@ function check_lon($lon)
     return false; 
 } 
 
+function IsPointInside($polygon, $point) {
+  $size = count($polygon);
+  if($size <= 1) return false;
+  $intersections_num = 0;
+  $prev = $size - 1;
+  $prev_under = $polygon[$prev]["y"] < $point["y"];
+
+  for($i = 0; $i < $size; $i++) {
+    $cur_under = $polygon[$i]["y"] < $point["y"];
+
+    $a["x"] = $polygon[$prev]["x"] - $point["x"];
+    $a["y"] = $polygon[$prev]["y"] - $point["y"];
+    $b["x"] = $polygon[$i]["x"]  - $point["x"];
+    $b["y"] = $polygon[$i]["y"]  - $point["y"];
+    
+    $t = ($a["x"]*($b["y"] - $a["y"]) - $a["y"]*($b["x"] - $a["x"]));
+    if($cur_under && !$prev_under) {
+      if($t > 0) $intersections_num += 1;
+    }
+    
+    if(!$cur_under && $prev_under){
+      if($t < 0) $intersections_num += 1;
+    }
+
+    $prev = $i;        
+    $prev_under = $cur_under;        
+  }
+  return $intersections_num;
+}
+
 function location_tree_src_get($lat,$lon)
 {
   global $_config;
-  $sql = 'SELECT * FROM ways WHERE  type="area" AND (('.$lat.' BETWEEN maxlat AND minlat) AND ('.$lon.' BETWEEN maxlon AND minlon)) ';
-
+  if ($_config['store_type'] == 'mysql')
+  {
+    $sql = 'SELECT * FROM ways WHERE  type="area" AND ((maxlat >= '.$lat.' AND minlat <= '.$lat.'  ) AND ( maxlon>='.$lon.' AND minlon<='.$lon.')) ORDER BY surface ASC  ';
+    $qh = mysql_query($sql);
+    while($row = mysql_fetch_array($qh))
+    {
+      var_dump($row);
+    }
+    print $sql;
+  }
 }
 
 
