@@ -13,5 +13,5 @@ $lat=56.793440; $lon=60.580909; // Постовского 16
 //$lat=56.893957; $lon=60.637536; // Краснофлотцев 39а
 //$lat=56.808585; $lon=59.928017; // Ревда
 //$lat=56.904878; $lon=59.948959; // Первоуральск
-$result = location_tree_src_get($lat,$lon);
+$result = location_tree_src_fine_get($lat,$lon);
 var_dump($result);

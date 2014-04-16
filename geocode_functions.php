@@ -1,4 +1,5 @@
 <?php
+
 define('COORDINATES_FORMAT', 'WGS84'); 
 define('MAJOR_AXIS', 6378137.0); //meters 
 define('MINOR_AXIS', 6356752.3142); //meters 
@@ -74,51 +75,88 @@ function check_lon($lon)
     else
        if($lon>=-180 && $lon<=0)  return 'west'; 
     return false; 
-} 
-
-function IsPointInside($polygon, $point) {
-  $size = count($polygon);
-  if($size <= 1) return false;
-  $intersections_num = 0;
-  $prev = $size - 1;
-  $prev_under = $polygon[$prev]["y"] < $point["y"];
-
-  for($i = 0; $i < $size; $i++) {
-    $cur_under = $polygon[$i]["y"] < $point["y"];
-
-    $a["x"] = $polygon[$prev]["x"] - $point["x"];
-    $a["y"] = $polygon[$prev]["y"] - $point["y"];
-    $b["x"] = $polygon[$i]["x"]  - $point["x"];
-    $b["y"] = $polygon[$i]["y"]  - $point["y"];
-    
-    $t = ($a["x"]*($b["y"] - $a["y"]) - $a["y"]*($b["x"] - $a["x"]));
-    if($cur_under && !$prev_under) {
-      if($t > 0) $intersections_num += 1;
+}
+/*
+//http://habrahabr.ru/post/143277/
+$coords = array(
+array('lng'=> 66.6634, 'lat' => '66.4433'),
+array('lng'=> 66.6534, 'lat' => '66.4433'),
+array('lng'=> 66.6434, 'lat' => '66.4433'), 
+array('lng'=> 66.6334, 'lat' => '66.4433'),
+);
+$in = into_poly(66.4455, 66.2255, &$coords, $x='lng', $y='lat');
+*/ 
+function into_poly($sx, $sy, &$coords, $x='x', $y='y')
+{
+    $pj=0;
+    $pk=0;
+    $wrkx=0;
+    $yu = 0;
+    $yl = 0;
+    $n = count($coords);
+    for ($pj=0; $pj<$n; $pj++)
+    {
+        $yu = $coords[$pj][$y]>$coords[($pj+1)%$n][$y]?$coords[$pj][$y]:$coords[($pj+1)%$n][$y];
+        $yl = $coords[$pj][$y]<$coords[($pj+1)%$n][$y]?$coords[$pj][$y]:$coords[($pj+1)%$n][$y];
+        if ($coords[($pj+1)%$n][$y] - $coords[$pj][$y])
+            $wrkx = $coords[$pj][$x] + ($coords[($pj+1)%$n][$x] - $coords[$pj][$x])*($sy - $coords[$pj][$y])/($coords[($pj+1)%$n][$y] - $coords[$pj][$y]);
+        else
+            $wrkx = $coords[$pj][$x];
+        if ($yu >= $sy)
+            if ($yl < $sy)
+            {
+                if ($sx > $wrkx)
+                    $pk++;
+                if (abs($sx - $wrkx) < 0.00001) return 1;
+            }
+        if ((abs($sy - $yl) < 0.00001) && (abs($yu - $yl) < 0.00001) && (abs(abs($wrkx - $coords[$pj][$x]) + abs($wrkx - $coords[($pj+1)%$n][$x]) - abs($coords[$pj][$x] - $coords[($pj+1)%$n][$x])) < 0.0001))
+            return 1;
     }
-    
-    if(!$cur_under && $prev_under){
-      if($t < 0) $intersections_num += 1;
-    }
-
-    $prev = $i;        
-    $prev_under = $cur_under;        
-  }
-  return $intersections_num;
+    if ($pk%2)
+        return 1;
+    else
+        return 0;
 }
 
-function location_tree_src_get($lat,$lon)
+
+
+
+/*
+ Быстро получает примерные отношения 
+*/
+function location_tree_src_fast_get($lat,$lon)
 {
   global $_config;
   if ($_config['store_type'] == 'mysql')
   {
     $sql = 'SELECT * FROM ways WHERE  type="area" AND ((maxlat >= '.$lat.' AND minlat <= '.$lat.'  ) AND ( maxlon>='.$lon.' AND minlon<='.$lon.')) ORDER BY surface ASC  ';
     $qh = mysql_query($sql);
+    $result = array();
     while($row = mysql_fetch_array($qh))
     {
-      var_dump($row);
+     $result[] = $row;
     }
-    print $sql;
+    return $result;
   }
 }
+function ways_wayid_to_key($ways)
+{
+  $result = array();
+}
+function location_tree_src_fine_get($lat,$lon)
+{
+ $fast_res = location_tree_src_fast_get($lat,$lon);
+ $ways = array();
+ foreach($fast_res as $way)
+ {
+ $ways[] = $way['way_id'];
+ }
+ $ways_data = ways_nodes_locations_get($ways);
+ $ways_data = ways_wayid_to_key($ways_data);
+ foreach($fast_res as $way)
+ {
+   $way_points = array();
+ }
 
-
+ var_dump($ways_data);
+}
