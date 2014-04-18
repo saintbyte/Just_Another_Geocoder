@@ -142,7 +142,13 @@ function location_tree_src_fast_get($lat,$lon)
 function ways_wayid_to_key($ways)
 {
   $result = array();
+  foreach($ways as $way)
+  {
+    $result[$way['way_id']][] = $way;
+  }
+  return $result;
 }
+
 function location_tree_src_fine_get($lat,$lon)
 {
  $fast_res = location_tree_src_fast_get($lat,$lon);
@@ -153,10 +159,17 @@ function location_tree_src_fine_get($lat,$lon)
  }
  $ways_data = ways_nodes_locations_get($ways);
  $ways_data = ways_wayid_to_key($ways_data);
- foreach($fast_res as $way)
+ $result = array();
+ foreach($ways_data as $way)
  {
-   $way_points = array();
+   
+   $res = into_poly($lat, $lon, $way, 'lat', 'lon');
+//   print $res;
+   if ($res) 
+   {
+     $result[] = $way;
+   }
  }
-
- var_dump($ways_data);
+// var_dump($ways_data);
+ return $result;
 }
