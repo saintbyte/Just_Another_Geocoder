@@ -5,7 +5,7 @@ define('MAJOR_AXIS', 6378137.0); //meters
 define('MINOR_AXIS', 6356752.3142); //meters 
 define('MAJOR_AXIS_POW_2', pow(MAJOR_AXIS, 2)); //meters 
 define('MINOR_AXIS_POW_2', pow(MINOR_AXIS, 2)); //meters 
-
+require('geoPHP/geoPHP.inc');
 /* 
 $gps_1['lat'] - latitude (широта) 
 $gps_1['lon'] - longitude (долгота) 
@@ -148,7 +148,20 @@ function ways_wayid_to_key($ways)
   }
   return $result;
 }
-
+function way_to_wkt($way_arr)
+{
+ $wkt_arr = array();
+ foreach($way_arr as $node)
+ {
+   $wkt_arr[] = $node['lon'].' '.$node['lat'];
+ }
+ if ($wkt_arr[0] != $wkt_arr[count($wkt_arr)-1])
+ {
+   $wkt_arr[] = $wkt_arr[0];
+ }
+ $wkt_s = 'POLYGON('.join(',',$wkt_arr).')';
+ return $wkt_s;
+}
 function location_tree_src_fine_get($lat,$lon)
 {
  $fast_res = location_tree_src_fast_get($lat,$lon);
@@ -160,15 +173,21 @@ function location_tree_src_fine_get($lat,$lon)
  $ways_data = ways_nodes_locations_get($ways);
  $ways_data = ways_wayid_to_key($ways_data);
  $result = array();
- foreach($ways_data as $way)
+ foreach($ways_data as $k=>$way)
  {
-   
-   $res = into_poly($lat, $lon, $way, 'lat', 'lon');
-//   print $res;
-   if ($res) 
-   {
-     $result[] = $way;
-   }
+   //POINT (Lon Lat)
+   $polygon = geoPHP::load(way_to_wkt($way),'wkt');
+   $area = $polygon->getArea();
+$centroid = $polygon->getCentroid();
+$centX = $centroid->getX();
+$centY = $centroid->getY();
+print $k." This polygon has an area of ".$area." and a centroid with X=".$centX." and Y=".$centY."\n";  
+   //$res = into_poly($lat, $lon, $way, 'lon', 'lat');
+   //print $res;
+   //if ($res) 
+   //{
+    // $result[] = $way;
+   //}
  }
 // var_dump($ways_data);
  return $result;
