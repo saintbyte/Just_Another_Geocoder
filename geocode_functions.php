@@ -162,6 +162,10 @@ function way_to_wkt($way_arr)
  $wkt_s = 'POLYGON('.join(',',$wkt_arr).')';
  return $wkt_s;
 }
+function lat_lon_to_wkt($lat,$lon)
+{
+    return 'POINT('.$lon.' '.$lat.')';
+}
 function location_tree_src_fine_get($lat,$lon)
 {
  $fast_res = location_tree_src_fast_get($lat,$lon);
@@ -176,18 +180,14 @@ function location_tree_src_fine_get($lat,$lon)
  foreach($ways_data as $k=>$way)
  {
    //POINT (Lon Lat)
+   $point = geoPHP::load(lat_lon_to_wkt($lat,$lon),'wkt');
    $polygon = geoPHP::load(way_to_wkt($way),'wkt');
-   $area = $polygon->getArea();
-$centroid = $polygon->getCentroid();
-$centX = $centroid->getX();
-$centY = $centroid->getY();
-print $k." This polygon has an area of ".$area." and a centroid with X=".$centX." and Y=".$centY."\n";  
-   //$res = into_poly($lat, $lon, $way, 'lon', 'lat');
-   //print $res;
-   //if ($res) 
-   //{
-    // $result[] = $way;
-   //}
+   $res = $polygon->pointInPolygon($point,true,true);
+   var_dump($res);
+   if ($res) 
+   {
+     $result[] = $k;
+   }
  }
 // var_dump($ways_data);
  return $result;
