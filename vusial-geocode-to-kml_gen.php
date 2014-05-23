@@ -53,7 +53,7 @@ $result = location_tree_src_fast_get($lat,$lon);
 foreach($result as $item)
 {
  $kml_template .= kml_placemark_begin();
-//$kml_template .= $row['lon'].','.$row['latM@M@'].','.$alt."\r\n";
+ //$kml_template .= $row['lon'].','.$row['latM@M@'].','.$alt."\r\n";
  $kml_template .= '';
  var_dump($item);
  print "\n\n";

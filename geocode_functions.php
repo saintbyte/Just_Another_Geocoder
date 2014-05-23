@@ -177,12 +177,12 @@ function location_tree_src_fine_get($lat,$lon)
  $ways_data = ways_nodes_locations_get($ways);
  $ways_data = ways_wayid_to_key($ways_data);
  $result = array();
+ var_dump($ways_data);
  foreach($ways_data as $k=>$way)
  {
    //POINT (Lon Lat)
-   $point = geoPHP::load(lat_lon_to_wkt($lat,$lon),'wkt');
-   $polygon = geoPHP::load(way_to_wkt($way),'wkt');
-   $res = $polygon->pointInPolygon($point,true,true);
+   $res = into_poly($lat, $lon, &$way, $x='lat', $y='lon');
+
    var_dump($res);
    if ($res) 
    {
