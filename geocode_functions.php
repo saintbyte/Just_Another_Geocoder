@@ -177,14 +177,12 @@ function location_tree_src_fine_get($lat,$lon)
  $ways_data = ways_nodes_locations_get($ways);
  $ways_data = ways_wayid_to_key($ways_data);
  $result = array();
- var_dump($ways_data);
  foreach($ways_data as $k=>$way)
  {
    //POINT (Lon Lat)
    $res = into_poly($lat, $lon, &$way, $x='lat', $y='lon');
-
-   var_dump($res);
-   if ($res) 
+   print $k .'=>'.$res."\n";
+   if ($res>0) 
    {
      $result[] = $k;
    }
